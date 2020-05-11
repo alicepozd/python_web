@@ -1,10 +1,12 @@
 # python_web
 
-###Запуск:
+Запуск:
+
 source env/bin/activate
+
 python main.py
 
-###Описание:
+Описание:
 
 Калькулятор кредитов
 
