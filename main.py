@@ -83,11 +83,12 @@ app.layout = html.Div([
 ])
 
 
-@app.callback(Output('credit_size_error', 'children'),
+@app.callback(
+    Output('credit_size_error', 'children'),
     [Input('credit_size_id', 'value')]
 )
 def render_credit_size_error(credit_size):
-    if credit_size != None:
+    if credit_size is not None:
         return
     return html.Div([
         html.Div(
@@ -97,11 +98,12 @@ def render_credit_size_error(credit_size):
     ])
 
 
-@app.callback(Output('rate_error', 'children'),
+@app.callback(
+    Output('rate_error', 'children'),
     [Input('rate_id', 'value')]
 )
 def render_rate_error(rate):
-    if rate != None:
+    if rate is not None:
         return
     return html.Div([
         html.Div(
@@ -111,11 +113,12 @@ def render_rate_error(rate):
     ])
 
 
-@app.callback(Output('period_error', 'children'),
+@app.callback(
+    Output('period_error', 'children'),
     [Input('period_id', 'value')]
 )
 def render_period_error(period):
-    if period != None:
+    if period is not None:
         return
     return html.Div([
         html.Div(
@@ -125,7 +128,8 @@ def render_period_error(period):
     ])
 
 
-@app.callback(Output('max_payment_size_error', 'children'),
+@app.callback(
+    Output('max_payment_size_error', 'children'),
     [
         Input('credit_size_id', 'value'),
         Input('rate_id', 'value'),
@@ -135,10 +139,10 @@ def render_period_error(period):
 )
 def max_payment_size_error(credit_size, rate, period, max_payment_size):
     month_rate = float(rate) / 100 / 12
-    if credit_size == None or rate == None:
+    if credit_size is None or rate is None:
         return
     elif max_payment_size - credit_size * month_rate <= max_payment_size / 120:
-        if period == None:
+        if period is None:
             return html.Div([
                 html.Div(
                     'max size of month payment is not enough, first plot will not be shown',
