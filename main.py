@@ -5,7 +5,7 @@ import dash_core_components as dcc
 from dash.dependencies import Input, Output
 
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+EXTERNAL_STYLESHEETS = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 
 def calculate_period(credit_size, rate, input_period, max_payment_size):
@@ -61,26 +61,27 @@ app = dash.Dash(
     __name__,
     server=server,
     routes_pathname_prefix='/dash/',
-    external_stylesheets=external_stylesheets
+    external_stylesheets=EXTERNAL_STYLESHEETS
 )
 
 
-app.layout = html.Div([
-    html.Div('enter the credit summ:'),
-    dcc.Input(id='credit_size_id', type='number', value=None, max=10000000, step=1),
-    html.Div(id='credit_size_error'),
-    html.Div('enter the rate:'),
-    dcc.Input(id='rate_id', type='number', value=None, max=100, min=0, step=1),
-    html.Div(id='rate_error'),
-    html.Div('enter the period in monthes:'),
-    dcc.Input(id='period_id', type='number', value=None, max=120, min=0, step=1),
-    html.Div(id='period_error'),
-    html.Div('enter the max size of month payment:'),
-    dcc.Input(id='max_payment_size_id', type='number', value=None),
-    html.Div(id='max_payment_size_error'),
-    dcc.Graph(id='month_graph'),
-    dcc.Graph(id='overpayment_graph')
-])
+app.layout = html.Div(
+    [
+        html.Div('enter the credit summ:'),
+        dcc.Input(id='credit_size_id', type='number', value=None, max=10000000, step=1),
+        html.Div(id='credit_size_error'),
+        html.Div('enter the rate:'),
+        dcc.Input(id='rate_id', type='number', value=None, max=100, min=0, step=1),
+        html.Div(id='rate_error'),
+        html.Div('enter the period in monthes:'),
+        dcc.Input(id='period_id', type='number', value=None, max=120, min=0, step=1),
+        html.Div('enter the max size of month payment:'),
+        dcc.Input(id='max_payment_size_id', type='number', value=None),
+        html.Div(id='first_graph_error'),
+        dcc.Graph(id='month_graph'),
+        dcc.Graph(id='overpayment_graph')
+    ]
+)
 
 
 @app.callback(
@@ -92,8 +93,8 @@ def render_credit_size_error(credit_size):
         return
     return html.Div([
         html.Div(
-            'no credit size specified, both plots will not be shown',
-            style={'color': 'red'}
+                'no credit size specified, both plots will not be shown',
+                style={'color': 'red'}
         )
     ])
 
@@ -107,29 +108,14 @@ def render_rate_error(rate):
         return
     return html.Div([
         html.Div(
-            'no rate specified, both plots will not be shown',
-            style={'color': 'red'}
+                'no rate specified, both plots will not be shown',
+                style={'color': 'red'}
         )
     ])
 
 
 @app.callback(
-    Output('period_error', 'children'),
-    [Input('period_id', 'value')]
-)
-def render_period_error(period):
-    if period is not None:
-        return
-    return html.Div([
-        html.Div(
-            'no period specified, first plot will not be shown',
-            style={'color': 'red'}
-        )
-    ])
-
-
-@app.callback(
-    Output('max_payment_size_error', 'children'),
+    Output('first_graph_error', 'children'),
     [
         Input('credit_size_id', 'value'),
         Input('rate_id', 'value'),
@@ -137,15 +123,25 @@ def render_period_error(period):
         Input('max_payment_size_id', 'value')
     ]
 )
-def max_payment_size_error(credit_size, rate, period, max_payment_size):
+def first_graph_error(credit_size, rate, period, max_payment_size):
     month_rate = float(rate) / 100 / 12
+    print(period)
     if credit_size is None or rate is None:
+        return
+    elif max_payment_size is None:
+        if period is None:
+            return html.Div([
+                html.Div(
+                    'no period or max size of month payment specified, first plot will not be shown',
+                    style={'color': 'red'}
+                )
+            ])
         return
     elif max_payment_size - credit_size * month_rate <= max_payment_size / 120:
         if period is None:
             return html.Div([
                 html.Div(
-                    'max size of month payment is not enough, first plot will not be shown',
+                    'max size of month payment is not enough and no period specified, first plot will not be shown',
                     style={'color': 'red'}
                 )
             ])
@@ -170,17 +166,17 @@ def update_overpayment_graph(credit_size, rate):
         payment_period, overpayment = get_overpayment_graph(credit_size, rate)
         return {
                 'data': [
-                    {'x': payment_period, 'y': overpayment, 'name': 'overpayment'},
-                    {'x': payment_period, 'y': [credit_size] * 179, 'name': 'credit_size'}
+                         {'x': payment_period, 'y': overpayment, 'name': 'overpayment'},
+                         {'x': payment_period, 'y': [credit_size] * 179, 'name': 'credit_size'}
                 ],
                 'layout': {
-                    'height': 600, 'width': 800, 'title': 'overpayment dependence from period'
+                           'height': 600, 'width': 800, 'title': 'overpayment dependence from period'
                 }
             }
-    except:
+    except TypeError:
         return {
                 'layout': {
-                    'height': 600, 'width': 800, 'title': 'overpayment dependence from period'
+                           'height': 600, 'width': 800, 'title': 'overpayment dependence from period'
                 }
             }
 
@@ -199,14 +195,14 @@ def update_month_graph(credit_size, rate, period, max_payment_size):
         x_payment, y_payment, y_credit_body = get_month_graph(credit_size, rate, period, max_payment_size)
         return {
                 'data': [
-                    {'x': x_payment, 'y': y_credit_body, 'type': 'bar', 'name': 'credit body'},
-                    {'x': x_payment, 'y': y_payment, 'type': 'bar', 'name': 'payments'}
+                         {'x': x_payment, 'y': y_credit_body, 'type': 'bar', 'name': 'credit body'},
+                         {'x': x_payment, 'y': y_payment, 'type': 'bar', 'name': 'payments'}
                 ],
                 'layout': {
-                    'height': 600, 'width': 800, 'title': 'month payment', 'barmode': 'stack'
+                           'height': 600, 'width': 800, 'title': 'month payment', 'barmode': 'stack'
                 }
             }
-    except:
+    except TypeError:
         return {
                 'layout': {'height': 600, 'width': 800, 'title': 'month payment'}
             }

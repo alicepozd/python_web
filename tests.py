@@ -19,8 +19,8 @@ class tests(unittest.TestCase):
         self.assertEqual(main.get_month_graph(1000, 20, None, 500)[2], [328.0, 334.0, 339.0])
 
     def test_get_overpayment_graph_first_type(self):
-        self.assertEqual(type(main.get_overpayment_graph(1000, 20)[0]), list)
-        self.assertEqual(type(main.get_overpayment_graph(1000, 20)[1]), list)
+        self.assertTrue(isinstance(main.get_overpayment_graph(1000, 20)[0], list))
+        self.assertTrue(isinstance(main.get_overpayment_graph(1000, 20)[1], list))
         self.assertEqual(len(main.get_overpayment_graph(1000, 20)[0]), 179)
         self.assertEqual(len(main.get_overpayment_graph(1000, 20)[1]), 179)
 
